@@ -10,10 +10,9 @@ const keyUpStream = Rx.Observable
         .map(({keyCode}) => keyCode)
         .map(keyCode => getCharFromKeyCode(keyCode))
         .filter(isValue)
+        .filter(key => key === stringStream[0])
         .subscribe(key => {
-          if (key === stringStream[0]) {
-            stringStream.shift();
-          }
+          stringStream.shift();
 
           console.log(stringStream);
         });

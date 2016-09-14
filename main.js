@@ -1,13 +1,19 @@
-import Rx from 'rxjs/Rx';
+import Rx from 'rx';
 import getCharFromKeyCode from './keycodes';
 import { isValue } from './fn';
+import { exampleString } from './data';
 
-Rx.Observable.fromEvent(window, 'keyup')
-  .map(({keyCode}) => keyCode)
-  .map(keyCode => getCharFromKeyCode(keyCode))
-  .filter(isValue)
-  .subscribe(showResults);
+const stringStream = Array.from(exampleString);
 
-function showResults(key) {
-  console.log(key);
-}
+const keyUpStream = Rx.Observable
+        .fromEvent(window, 'keyup')
+        .map(({keyCode}) => keyCode)
+        .map(keyCode => getCharFromKeyCode(keyCode))
+        .filter(isValue)
+        .subscribe(key => {
+          if (key === stringStream[0]) {
+            stringStream.shift();
+          }
+
+          console.log(stringStream);
+        });

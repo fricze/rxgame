@@ -40,6 +40,6 @@
     "webpack-bundle-tracker": "0.0.8"
   },
   "dependencies": {
-    "rxjs-es": "^5.0.0-beta.12"
+    "rx": "^4.1.0"
   }
 }

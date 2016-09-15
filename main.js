@@ -3,7 +3,8 @@ import getCharFromKeyCode from './keycodes';
 import { isValue } from './fn';
 import { exampleString } from './data';
 
-const sourceCharArr = Rx.Observable.return(exampleString);
+const sourceCharArr = Rx.Observable.return(exampleString.split(''));
+
 const keyUpStream = Rx.Observable.fromEvent(window, 'keyup');
 
 const interval = Rx.Observable
@@ -20,8 +21,8 @@ keyUpStream
   .withLatestFrom(sourceCharArr, (key, data) => ({key, data}))
   .filter(({key, data}) => key === data[0])
   .subscribe(({data}) => {
-    const shiftedArray = data.shift();
-    source.onNext(shiftedArray);
+    data.shift();
+    sourceCharArr.onNext(data);
     console.log(data);
   });
 

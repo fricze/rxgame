@@ -4,7 +4,7 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "watch": "./node_modules/webpack/bin/webpack.js --config webpack.config.js --watch --progress --colors"
+    "watch": "webpack --config webpack.config.js --watch --progress --colors"
   },
   "repository": {
     "type": "git",

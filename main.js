@@ -4,18 +4,14 @@ import { isValue } from './fn';
 import { exampleString } from './data';
 
 const sourceCharArr = Rx.Observable.return(exampleString);
-const shiftCharArr = {
-  next: charArr => {
-    charArr.shift();
-    return charArr;
-  },
-  error: err => console.error('Observer got an error: ' + err),
-  complete: () => console.log('Observer got a complete notification')
-};
-
-sourceCharArr.subscribe(shiftCharArr);
-
 const keyUpStream = Rx.Observable.fromEvent(window, 'keyup');
+
+const interval = Rx.Observable
+  .interval(100 /* ms */)
+  .timeInterval();
+
+sourceCharArr
+  .withLatestFrom(interval, (char, time) => console.log(time));
 
 keyUpStream
   .map(({keyCode}) => keyCode)
@@ -24,7 +20,8 @@ keyUpStream
   .withLatestFrom(sourceCharArr, (key, data) => ({key, data}))
   .filter(({key, data}) => key === data[0])
   .subscribe(({data}) => {
-    source.onNext(data);
+    const shiftedArray = data.shift();
+    source.onNext(shiftedArray);
     console.log(data);
   });
 

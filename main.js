@@ -1,58 +1,33 @@
 import Rx from 'rx';
 import getCharFromKeyCode from './keycodes';
 import { isValue } from './fn';
+import { exampleString } from 'data';
 
-const l = console.log;
-const observer1 = {
-  next: (v) => console.log(v),
-  complete: () => 'completed'
-}
-var observer2 = Rx.Observer.create(
-  function (x) {
-    console.log('Next: ' + x);
-  },
-  function (err) {
-    console.log('Error: ' + err);
-  },
-  function () {
-    console.log('Completed');
-  }
-);
-
-let sourceCharArr;
-let sourceArrObservable
+let sourceCharArr = exampleString.split('');
+const arrSubject = new Rx.Subject();
 const fromKeyBoard$ =  Rx.Observable.fromEvent(window, 'keyup');
 
-const source  = fromKeyBoard$
+arrSubject.subscribe((data) => {
+  console.log('in subject ' + data)
+  if(data.length === 0) {
+    arrSubject.onCompleted();
+    source.onCompleted();
+  }
+});
+
+const source = fromKeyBoard$
   .map(({keyCode}) => keyCode)
   .map(keyCode => getCharFromKeyCode(keyCode))
   .filter((x)=>x)
-  .withLatestFrom(sourceArrObservable, (key, data) => ({key, data}))
-  .filter(({key, data}) => console.log(key,data) || key === data[0])
-  .map(({data})=>{
-    console.log(data)
-    const shifted = [...data]
-      shifted.shift();
+  .withLatestFrom(arrSubject, (key, data) => ({key, data}))
+  .filter(({key, data}) => key === data[0])
+  .subscribe(({key, data})=> {
+    console.log('key is ', key);
+    const shifted = [...data];
+    shifted.shift();
+    arrSubject.onNext(shifted);
     return shifted;
-  })
-//
-console.log(source); // source jest
-// a wyskakuje blad, ze nie mozna subskrybowac sie pod undefined
-source.subscribe(({data}) => {
+  });
 
-})
-// tak jakby sourca nie bylo
-sourceArrObservable = Rx.Observable.create((observer) => {
-  source.subscribe(({data}) =>{
-    console.log(data)
-    observer.onNext(data)
-  })
-  return function () {
-    console.log('disposed');
-  };
-//  filteredStream$.subscribe(({data}) => observer.onNext(data))
-})
-
-sourceArrObservable.subscribe(observer2)
-
-console.log(sourceArrObservable)
+// INIT
+arrSubject.onNext(sourceCharArr);

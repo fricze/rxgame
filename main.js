@@ -1,33 +1,45 @@
 import Rx from 'rx';
-import getCharFromKeyCode from './keycodes';
 import { exampleString } from 'data';
+import mainIntent from './intent';
+import mainView from './view';
+import replicate from './replicate';
 
-const sourceCharArr = exampleString.split('');
 
-const arrSubject = new Rx.Subject();
-const fromKeyBoard$ =  Rx.Observable.fromEvent(window, 'keyup');
+const model = new Rx.Subject();
 
-const source = fromKeyBoard$
-        .map(({keyCode}) => keyCode)
-        .map(keyCode => getCharFromKeyCode(keyCode))
-        .filter((x)=>x)
-        .withLatestFrom(arrSubject, (key, data) => ({key, data}))
-        .filter(({key, data}) => key === data[0])
-        .subscribe(({key, data})=> {
-          console.log('key is ', key);
-          const shifted = [...data];
-          shifted.shift();
-          arrSubject.onNext(shifted);
-          return shifted;
-        });
+const data = model
+        .startWith({
+          string: exampleString.split(''),
+          char: ''
+        })
+        .scan((acc, data) => {
+          return {
+            string: acc.string[0],
+            char: data
+          };
+        })
+        .filter(({string, char}) => string === char);
 
-arrSubject.subscribe((data) => {
-  console.log('in subject ' + data)
-  if(data.length === 0) {
-    arrSubject.onCompleted();
-    source.onCompleted();
-  }
-});
+
+const view = mainView(data);
+const intent = mainIntent(view);
+
+// MODEL
+replicate(intent.shiftString, model);
+
+// .withLatestFrom(model, (key, data) => {
+//         console.log('withLatestFrom');
+
+//         return ({key, data})
+//       })
+//       .filter(({key, data}) => key === data[0])
+// model.subscribe((data) => {
+//   console.log('in subject ' + data)
+//   // if(data.length === 0) {
+//   //   model.onCompleted();
+//   //   source.onCompleted();
+//   // }
+// });
 
 // INIT
-arrSubject.onNext(sourceCharArr);
+model.onNext(exampleString.split(''));

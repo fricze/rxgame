@@ -9,6 +9,8 @@ module.exports = {
     main: './main'
   },
 
+  devtool: 'source-map',
+
   output: {
     path: path.resolve('./bundles/'),
     publicPath: '/bundles/',

@@ -7,19 +7,10 @@ const sourceCharArr = exampleString.split('');
 const fromKeyBoard$ =  Rx.Observable.fromEvent(window, 'keyup');
 
 const source = fromKeyBoard$
-  .map(({keyCode}) => keyCode)
-  .map(keyCode => getCharFromKeyCode(keyCode))
-  .filter(identity)
-  .scan((acc, val) =>{
-    const isEqual = acc[0] === val;
-    return acc.slice(+isEqual);
-  },sourceCharArr)
-  .do((acc)=>console.log(acc))
-  .filter((string)=>string.length===0)
-  .subscribe((obj) => {
-    console.log('end');
-    source.onCompleted();
-  });
+  .map(({keyCode}) => getCharFromKeyCode(keyCode))
+  .scan((acc, val) => acc.slice(acc[0] === val), sourceCharArr)
+  .filter((string)=>string.length === 0)
+  .subscribe(() => source.onCompleted());
 
 
 /*

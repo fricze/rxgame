@@ -3,10 +3,12 @@ import View from './view';
 import Model from './model';
 import renderer from './renderer';
 
-Intent.observe(View);
-Model.observe(Intent);
+import { exampleString } from 'data';
+
+renderer(View.viewTree$);
+
 View.observe(Model);
+Model.observe(Intent);
+Intent.observe(View);
 
-renderer(View.viewTree);
-
-// MODEL
+Model.currentString$.onNext(exampleString);

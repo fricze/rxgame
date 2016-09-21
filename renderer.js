@@ -8,7 +8,9 @@ const render = string => {
 }
 
 const renderer = (viewTree) => {
-  viewTree.subscribe(render);
+  viewTree.subscribe(render, () => null, function onCompleted() {
+    alert('complete!');
+  });
 }
 
 export default renderer;

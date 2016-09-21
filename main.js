@@ -5,7 +5,7 @@ import renderer from './renderer';
 
 import { exampleString } from 'data';
 
-renderer(View.viewTree$);
+renderer(View.viewData$);
 
 View.observe(Model);
 Model.observe(Intent);

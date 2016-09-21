@@ -3,11 +3,11 @@ import Rx from 'rx';
 import replicate from './replicate';
 import { isValue } from './fn';
 
-const viewTree$ = new Rx.Subject();
+const viewData$ = new Rx.Subject();
 const fromKeyBoard$ = Rx.Observable.fromEvent(window, 'keyup');
 
 const observe = model => {
-  replicate(model.currentString$, viewTree$);
+  replicate(model.currentString$, viewData$);
 }
 
 export default {
@@ -16,6 +16,6 @@ export default {
     .map(keyCode => getCharFromKeyCode(keyCode))
     .filter(isValue),
 
-  viewTree$,
+  viewData$,
   observe
 }

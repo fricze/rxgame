@@ -9,8 +9,13 @@ const fromKeyBoard$ =  Rx.Observable.fromEvent(window, 'keyup');
 const source = fromKeyBoard$
   .map(({keyCode}) => getCharFromKeyCode(keyCode))
   .scan((acc, val) => acc.slice(acc[0] === val), sourceCharArr)
-  .filter((string)=>string.length === 0)
+
+
+source.filter((string)=>string.length === 0)
   .subscribe(() => source.onCompleted());
+
+source.filter((string)=>string.length !== 0)
+  .subscribe(s => console.log(s))
 
 
 /*

@@ -1,10 +1,28 @@
 import Rx from 'rx';
-const modelSubject = new Rx.Subject();
+import replicate from './replicate';
 
-const mainModel = (intent) => {
-  return {
-    shiftString: intent.keysEqual
-  };
+import { exampleString } from 'data';
+
+const currentString$ = new Rx.Subject();
+const keyDown$ = new Rx.Subject();
+
+keyDown$
+  .withLatestFrom(currentString$, (char, string) => ({string, char}))
+  .filter(({string, char}) => string[0] === char)
+  .map(({string}) => {
+    const [ , ...restString ] = string;
+
+    return restString.join('');
+  })
+  .subscribe(restString => currentString$.onNext(restString))
+
+const observe = intent => {
+  replicate(intent.keyDown$, keyDown$);
+
+  currentString$.onNext(exampleString);
 }
 
-export default mainModel;
+export default {
+  currentString$,
+  observe
+}

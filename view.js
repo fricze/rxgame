@@ -3,20 +3,19 @@ import Rx from 'rx';
 import replicate from './replicate';
 import { isValue } from './fn';
 
-const mainView = (model) => {
-  const viewTree = new Rx.Subject();
-  replicate(model, viewTree);
+const viewTree = new Rx.Subject();
+const fromKeyBoard$ = Rx.Observable.fromEvent(window, 'keyup');
 
-  const fromKeyBoard$ = Rx.Observable.fromEvent(window, 'keyup');
-
-  return {
-    keysEqual: fromKeyBoard$
-      .map(({keyCode}) => keyCode)
-      .map(keyCode => getCharFromKeyCode(keyCode))
-      .filter(isValue),
-
-    viewTree
-  };
+const observe = model => {
+  replicate(model.currentString$, viewTree);
 }
 
-export default mainView;
+export default {
+  keyDown$: fromKeyBoard$
+    .map(({keyCode}) => keyCode)
+    .map(keyCode => getCharFromKeyCode(keyCode))
+    .filter(isValue),
+
+  viewTree,
+  observe
+}

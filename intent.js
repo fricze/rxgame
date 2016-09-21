@@ -1,13 +1,13 @@
 import Rx from 'rx';
 import replicate from './replicate';
 
-const mainIntent = (view) => {
-  const shiftString = new Rx.Subject();
-  replicate(view.keysEqual, shiftString);
+const keyDown$ = new Rx.Subject();
 
-  return {
-    shiftString
-  };
+const observe = view => {
+  replicate(view.keyDown$, keyDown$);
 }
 
-export default mainIntent;
+export default {
+  keyDown$,
+  observe
+};

@@ -1,15 +1,8 @@
 import Rx from 'rx';
-import replicate from './repe';
+import replicate from './replicate';
 import { identity } from './fn';
 
 const clearModel$ = new Rx.Subject();
-
-clearModel$
-  .filter(identity)
-  .subscribe(() => {
-    currentString$.onCompleted();
-    keyDown$.onCompleted();
-  });
 
 const currentString$ = new Rx.Subject();
 
@@ -31,6 +24,14 @@ keyDownObserver$
   .subscribe(restString => {
     currentString$.onNext(restString);
   });
+
+clearModel$
+  .filter(identity)
+  .subscribe(() => {
+    currentString$.onNext('you won');
+    // keyDown$.onCompleted();
+  });
+
 
 const observe = intent => {
   replicate(intent.keyDown$, keyDown$);

@@ -6,7 +6,8 @@ module.exports = {
   context: __dirname,
 
   entry: {
-    main: './main'
+    main: './main',
+    course: './course/map_reduce',
   },
 
   output: {

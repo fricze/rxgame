@@ -9,15 +9,7 @@ const fromKeyBoard$ =  Rx.Observable.fromEvent(window, 'keyup');
 const source = fromKeyBoard$
   .map(({keyCode}) => getCharFromKeyCode(keyCode))
   .scan((acc, val) => acc.slice(acc[0] === val), sourceCharArr)
-  .do((acc) => {
-    console.log('acc ' + acc);
-    //rob pan co chceta tutaj
-  })
   .filter((stringArr) => stringArr.length === 0)
-  .do((emptyArr) => {
-    console.log('emptyArr ' + emptyArr);
-    //rob pan co chceta tutaj
-  })
   .subscribe(() => source.onCompleted());
 
 
@@ -72,4 +64,4 @@ const source = fromKeyBoard$
 
 // INIT
 arrSubject.onNext(sourceCharArr);
-  */
+ */

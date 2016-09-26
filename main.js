@@ -26,15 +26,19 @@ const newData = ({
   const newToCheck = toCheck.slice(1).safeReverse()
 
   const newState = {
-    left: {
-      toCheck: newToCheck,
-      toView: toView.slice(1),
-      border: right,
+    get left() {
+      return {
+        toCheck: newToCheck,
+        toView: toView.slice(1),
+        border: right,
+      }
     },
-    right: {
-      toCheck: newToCheck,
-      toView: toView.slice(0, -1),
-      border: left,
+    get right() {
+      return {
+        toCheck: newToCheck,
+        toView: toView.slice(0, -1),
+        border: left,
+      }
     },
   };
 

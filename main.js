@@ -14,32 +14,36 @@ const spacesToUnderscore = string => string.map(letter => letter === ' ' ? '_' :
 const left = 'left';
 const right = 'right';
 
-const newData = ({toCheck, toView, properHit, border}) => {
+const newData = ({
+  toCheck, toView, border, properHit
+}) => {
   const constString = {
     toCheck,
     toView,
     border
   };
 
+  const newToCheck = toCheck.slice(1).safeReverse()
+
   const newState = {
-    [left]: {
-      toCheck: toCheck.slice(1).safeReverse(),
+    left: {
+      toCheck: newToCheck,
       toView: toView.slice(1),
       border: right,
     },
-    [right]: {
-      toCheck: toCheck.slice(1).safeReverse(),
-      toView: toView.safeReverse().slice(1).safeReverse(),
+    right: {
+      toCheck: newToCheck,
+      toView: toView.slice(0, -1),
       border: left,
     },
   };
 
   const nextState = {
-    false: () => constString,
-    true: border => newState[border],
+    false: constString,
+    true: newState[border],
   };
 
-  return nextState[properHit](border);
+  return nextState[properHit];
 };
 
 const letters$ = fromKeyBoard$

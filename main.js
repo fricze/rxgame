@@ -9,36 +9,38 @@ Array.prototype.safeReverse = function safeReverse() {
   return this.slice().reverse();
 }
 
+const spacesToUnderscore = string => string.map(letter => letter === ' ' ? '_' : letter).join('');
+
 const left = 'left';
 const right = 'right';
 
-const makeKey = (border, proper) => `${border}_${proper}`;
-
 const newData = (toCheck, toView) => (proper, border) => {
-  const key = makeKey(border, proper);
-
   const constString = {
     toCheck,
     toView,
     border
   };
 
-  const check = {
-    [makeKey(left, false)]: constString,
-    [makeKey(right, false)]: constString,
-    [makeKey(left, true)]: {
-      toCheck: toCheck.slice(1).safeReverse(),
-      toView: toView.slice(1),
-      border: right,
+  const nextState = {
+    false: {
+      [left]: constString,
+      [right]: constString,
     },
-    [makeKey(right, true)]: {
-      toCheck: toCheck.slice(1).safeReverse(),
-      toView: toView.safeReverse().slice(1).safeReverse(),
-      border: left,
-    },
+    true: {
+      [left]: {
+        toCheck: toCheck.slice(1).safeReverse(),
+        toView: toView.slice(1),
+        border: right,
+      },
+      [right]: {
+        toCheck: toCheck.slice(1).safeReverse(),
+        toView: toView.safeReverse().slice(1).safeReverse(),
+        border: left,
+      },
+    }
   };
 
-  return check[key];
+  return nextState[proper][border];
 };
 
 const letters$ = fromKeyBoard$
@@ -79,10 +81,11 @@ const lettersGame$ = letters$
 
 const lettersSubscription = lettersGame$
         .subscribe((x) => {
-          textElement.innerText = x.map(letter => letter === ' ' ? '_' : letter).join('');
+          textElement.innerText = spacesToUnderscore(x);
         }, x => { console.error(x) });
 
-const finalSubscription = lettersGame$.filter((stringArr) => stringArr.length === 0)
+const finalSubscription = lettersGame$
+        .filter((stringArr) => stringArr.length === 0)
         .do(()=>console.log('you won'))
         .subscribe(() => {
           // closing channel is needed in order to clear timeout (and error that it generates)

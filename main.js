@@ -57,13 +57,14 @@ const letters$ = fromKeyBoard$
                 border: left
               })
         .distinctUntilChanged(data => data.toView.join(''))
-        .map(data => data.toView)
+        .pluck('toView')
         .takeUntil(Rx.Observable.timer(5000));
 
 const firstInterval = Number(window.interval.value);
 
 const interval$ = Rx.Observable.fromEvent(window.interval, 'change')
-        .map(e => Number(e.currentTarget.value))
+        .pluck('currentTarget', 'value')
+        .map(e => Number(e))
         .startWith(firstInterval);
 
 const textElement = window.text;

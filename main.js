@@ -54,8 +54,7 @@ const letters$ = fromKeyBoard$
                 toView: sourceCharArr,
                 border: left
               })
-        .distinctUntilChanged(data => data.toView.join(''))
-        .share();
+        .distinctUntilChanged(data => data.toView.join(''));
 
 const firstInterval = Number(window.interval.value);
 

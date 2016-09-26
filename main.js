@@ -56,7 +56,9 @@ const letters$ = fromKeyBoard$
                 toView: sourceCharArr,
                 border: left
               })
-        .distinctUntilChanged(data => data.toView.join(''));
+        .distinctUntilChanged(data => data.toView.join(''))
+        .map(data => data.toView)
+        .takeUntil(Rx.Observable.timer(5000));
 
 const firstInterval = Number(window.interval.value);
 
@@ -75,8 +77,11 @@ letters$
 
 const lettersGame$ = letters$
         .withLatestFrom(interval$)
-        .timeout(([ , interval]) => Rx.Observable.timer(interval))
-        .map(([data]) => data.toView)
+        .timeout(
+          ([ , interval]) => Rx.Observable.timer(interval),
+          Rx.Observable.just('loser!').map(x => [[x]])
+        )
+        .map(([data]) => data)
         .share();
 
 const lettersSubscription = lettersGame$
@@ -84,7 +89,9 @@ const lettersSubscription = lettersGame$
           (x) => {
             textElement.innerText = spacesToUnderscore(x);
           },
-          x => { console.error(x) });
+          x => { console.error(x) },
+          () => console.log('onComplete!')
+        );
 
 const finalSubscription = lettersGame$
         .filter((stringArr) => stringArr.length === 0)

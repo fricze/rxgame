@@ -77,7 +77,7 @@ const lettersGame$ = letters$
 
 const lettersSubscription = lettersGame$
         .subscribe((x) => {
-          textElement.innerText = x.join('');
+          textElement.innerText = x.map(letter => letter === ' ' ? '_' : letter).join('');
         }, x => { console.error(x) });
 
 const finalSubscription = lettersGame$.filter((stringArr) => stringArr.length === 0)

@@ -1,1 +1,1 @@
-export const exampleString = 'little fucker';
+export const exampleString = 'little fuckerz';

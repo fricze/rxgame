@@ -52,17 +52,7 @@ const letters$ = fromKeyBoard$
         .scan(({toCheck, toView, border}, val) => {
           const properHit = toCheck[0] === val;
 
-          const data = newData({toCheck, toView, properHit, border});
-
-          toCheck = data.toCheck;
-          toView = data.toView;
-          border = data.border;
-
-          return {
-            toCheck,
-            toView,
-            border,
-          };
+          return newData({toCheck, toView, properHit, border});
         }, {
           toCheck: sourceCharArr,
           toView: sourceCharArr,

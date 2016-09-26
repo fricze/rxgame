@@ -12,7 +12,7 @@ Array.prototype.safeReverse = function safeReverse() {
 const left = 'left';
 const right = 'right';
 
-const newString = (toCheck, toView) => (proper, border) => {
+const newData = (toCheck, toView) => (proper, border) => {
   const key = `${border}_${proper}`;
 
   const constString = {
@@ -45,7 +45,7 @@ const letters$ = fromKeyBoard$
         .scan(({toCheck, toView, border}, val) => {
           const properHit = toCheck[0] === val;
 
-          const data = newString(toCheck, toView)(properHit, border);
+          const data = newData(toCheck, toView)(properHit, border);
 
           toCheck = data.toCheck;
           toView = data.toView;

@@ -3,12 +3,15 @@ import getCharFromKeyCode from './keycodes';
 import { isValue,identity } from './fn';
 import { exampleString } from 'data';
 
-const sourceCharArr = exampleString.split('');
+const sourceCharArr = 'abcde'.split('').reverse();
 const fromKeyBoard$ = Rx.Observable.fromEvent(window, 'keyup');
 
 const letters$ = fromKeyBoard$
         .map(({keyCode}) => getCharFromKeyCode(keyCode))
-        .scan((acc, val) => acc.slice(acc[0] === val), sourceCharArr);
+        .scan((acc, val) => {
+           return acc.slice(!!((acc[acc.length-1] === val) && acc.reverse()));
+          }, sourceCharArr
+        );
 
 const firstInterval = Number(window.interval.value);
 
@@ -18,7 +21,7 @@ const interval$ = Rx.Observable.fromEvent(window.interval, 'change')
 
 const lettersSubscription = letters$
         .withLatestFrom(interval$)
-        .timeout(([_, interval]) => Rx.Observable.timer(interval))
+        .timeout(([_, interval]) => Rx.Observable.timer(interval*9))
         .map(([data]) => data)
         .subscribe((x) => {
           console.log(x)

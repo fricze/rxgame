@@ -23,20 +23,22 @@ const newData = ({
     border
   };
 
-  const newToCheck = toCheck.slice(1).safeReverse();
-
   const newState = {
     get left() {
+      const newToView = toView.slice(1);
+
       return {
-        toCheck: newToCheck,
-        toView: toView.slice(1),
+        toCheck: newToView[newToView.length - 1],
+        toView: newToView,
         border: right,
       }
     },
     get right() {
+      const newToView = toView.slice(0, -1);
+
       return {
-        toCheck: newToCheck,
-        toView: toView.slice(0, -1),
+        toCheck: newToView[0],
+        toView: newToView,
         border: left,
       }
     },
@@ -49,8 +51,8 @@ const letters$ = fromKeyBoard$
         .startWith('')
         .map(({keyCode}) => getCharFromKeyCode(keyCode))
         .scan(({toCheck, toView, border}, val) =>
-              newData({toCheck, toView, properHit: toCheck[0] === val, border}),
-              { toCheck: sourceCharArr,
+              newData({toCheck, toView, properHit: toCheck === val, border}),
+              { toCheck: sourceCharArr[0],
                 toView: sourceCharArr,
                 border: left
               })

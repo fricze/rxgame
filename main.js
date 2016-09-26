@@ -17,13 +17,13 @@ const right = 'right';
 const newData = ({
   toCheck, toView, border, properHit
 }) => {
-  const constString = {
+  const constValue = {
     toCheck,
     toView,
     border
   };
 
-  const newToCheck = toCheck.slice(1).safeReverse()
+  const newToCheck = toCheck.slice(1).safeReverse();
 
   const newState = {
     get left() {
@@ -42,12 +42,7 @@ const newData = ({
     },
   };
 
-  const nextState = {
-    false: constString,
-    true: newState[border],
-  };
-
-  return nextState[properHit];
+  return properHit ? newState[border] : constValue;
 };
 
 const letters$ = fromKeyBoard$

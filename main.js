@@ -53,7 +53,9 @@ const letters$ = fromKeyBoard$
               { toCheck: sourceCharArr,
                 toView: sourceCharArr,
                 border: left
-              });
+              })
+        .distinctUntilChanged(data => data.toView.join(''))
+        .share();
 
 const firstInterval = Number(window.interval.value);
 
@@ -63,19 +65,29 @@ const interval$ = Rx.Observable.fromEvent(window.interval, 'change')
 
 const textElement = window.text;
 
+letters$
+  .timeInterval()
+  .map(data => data.interval)
+  .scan((acc, val) => acc + val, 0)
+  .map((val, idx) => val / (idx + 1))
+  .subscribe(x => console.log(x));
+
 const lettersGame$ = letters$
         .withLatestFrom(interval$)
         .timeout(([ , interval]) => Rx.Observable.timer(interval))
-        .map(([data]) => data.toView);
+        .map(([data]) => data.toView)
+        .share();
 
 const lettersSubscription = lettersGame$
-        .subscribe((x) => {
-          textElement.innerText = spacesToUnderscore(x);
-        }, x => { console.error(x) });
+        .subscribe(
+          (x) => {
+            textElement.innerText = spacesToUnderscore(x);
+          },
+          x => { console.error(x) });
 
 const finalSubscription = lettersGame$
         .filter((stringArr) => stringArr.length === 0)
-        .do(()=>console.log('you won'))
+        .do(() => console.log('you won'))
         .subscribe(() => {
           // closing channel is needed in order to clear timeout (and error that it generates)
           finalSubscription.dispose();

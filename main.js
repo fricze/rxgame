@@ -12,8 +12,10 @@ Array.prototype.safeReverse = function safeReverse() {
 const left = 'left';
 const right = 'right';
 
+const makeKey = (border, proper) => `${border}_${proper}`;
+
 const newData = (toCheck, toView) => (proper, border) => {
-  const key = `${border}_${proper}`;
+  const key = makeKey(border, proper);
 
   const constString = {
     toCheck,
@@ -22,14 +24,14 @@ const newData = (toCheck, toView) => (proper, border) => {
   };
 
   const check = {
-    'left_false': constString,
-    'right_false': constString,
-    'left_true': {
+    [makeKey(left, false)]: constString,
+    [makeKey(right, false)]: constString,
+    [makeKey(left, true)]: {
       toCheck: toCheck.slice(1).safeReverse(),
       toView: toView.slice(1),
       border: right,
     },
-    'right_true': {
+    [makeKey(right, true)]: {
       toCheck: toCheck.slice(1).safeReverse(),
       toView: toView.safeReverse().slice(1).safeReverse(),
       border: left,

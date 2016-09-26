@@ -8,8 +8,8 @@ const fromKeyBoard$ = Rx.Observable.fromEvent(window, 'keyup');
 
 const letters$ = fromKeyBoard$
         .map(({keyCode}) => getCharFromKeyCode(keyCode))
-        .scan((acc, val) => {
-            const indexToCompare = +(!(acc.length % 2) && acc.length - 1);
+        .scan((acc, val, index) => {
+            const indexToCompare = +(!(index % 2) && acc.length - 1);
             const isMatch = (acc[indexToCompare] === val);
             acc.splice(indexToCompare,isMatch);
             return acc;

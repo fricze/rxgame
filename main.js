@@ -49,15 +49,12 @@ const newData = ({
 const letters$ = fromKeyBoard$
         .startWith('')
         .map(({keyCode}) => getCharFromKeyCode(keyCode))
-        .scan(({toCheck, toView, border}, val) => {
-          const properHit = toCheck[0] === val;
-
-          return newData({toCheck, toView, properHit, border});
-        }, {
-          toCheck: sourceCharArr,
-          toView: sourceCharArr,
-          border: left
-        });
+        .scan(({toCheck, toView, border}, val) =>
+              newData({toCheck, toView, properHit: toCheck[0] === val, border}),
+              { toCheck: sourceCharArr,
+                toView: sourceCharArr,
+                border: left
+              });
 
 const firstInterval = Number(window.interval.value);
 

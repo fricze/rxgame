@@ -1,20 +1,18 @@
 import Rx from 'rx';
 import getCharFromKeyCode from './keycodes';
-import { isValue,identity } from './fn';
 import { exampleString } from 'data';
 
-const sourceCharArr = 'abcdefg'.split('');
+const sourceCharArr = exampleString.split('');
 const fromKeyBoard$ = Rx.Observable.fromEvent(window, 'keyup');
 
 const letters$ = fromKeyBoard$
         .map(({keyCode}) => getCharFromKeyCode(keyCode))
         .scan((acc, val, index) => {
-            const indexToCompare = +(!(index % 2) && acc.length - 1);
-            const isMatch = (acc[indexToCompare] === val);
-            acc.splice(indexToCompare,isMatch);
-            return acc;
-          }, sourceCharArr
-        );
+          const indexToCompare = +(!(index % 2) && acc.length - 1);
+          const isMatch = (acc[indexToCompare] === val);
+          acc.splice(indexToCompare,isMatch);
+          return acc;
+        }, sourceCharArr);
 
 const firstInterval = Number(window.interval.value);
 
@@ -31,15 +29,15 @@ const lettersGame$ = letters$
 
 const lettersSubscription = lettersGame$
         .subscribe((x) => {
-          window.text.innerText = x.join('');
+          textElement.innerText = x.join('');
         }, x => { alert(x) });
 
 const finalSubscription = lettersGame$.filter((stringArr) => stringArr.length === 0)
-  .do(()=>console.log('you won'))
-  .subscribe(() => {
-    finalSubscription.dispose(); // closing channel is needed in order to clear timeout (and error that it generates)
-    lettersSubscription.dispose();
-  });
+        .do(()=>console.log('you won'))
+        .subscribe(() => {
+          finalSubscription.dispose(); // closing channel is needed in order to clear timeout (and error that it generates)
+          lettersSubscription.dispose();
+        });
 
 /*
  const arrObservable = new Rx.Observable.just(sourceCharArr).subscribe((observer) => {

@@ -1,6 +1,7 @@
 import Rx from 'rx';
-import getCharFromKeyCode from './keycodes';
+import getCharFromKeyCode, { keyCodes } from './keycodes';
 import { exampleString } from 'data';
+import { identity } from 'fn';
 
 const sourceCharArr = exampleString.split('');
 const fromKeyBoard$ = Rx.Observable.fromEvent(window, 'keyup');
@@ -14,51 +15,54 @@ const spacesToUnderscore = string => string.map(letter => letter === ' ' ? '_' :
 const left = 'left';
 const right = 'right';
 
-const newData = ({
-  toCheck, toView, border, properHit
-}) => {
-  const constValue = {
-    toCheck,
-    toView,
-    border
-  };
+const mapObject = (obj, fn) => {
+  return Object.keys(obj).reduce(function(acc, current) {
+    const { key, val } = fn(current, obj[current]);
+    acc[key] = val;
 
-  const newState = {
-    get left() {
-      const newToView = toView.slice(1);
+    return acc;
+  }, {});
+}
 
-      return {
-        toCheck: newToView[newToView.length - 1],
-        toView: newToView,
-        border: right,
-      }
-    },
-    get right() {
-      const newToView = toView.slice(0, -1);
+const nextState = () => mapObject(keyCodes, (key, val) => ({ key: val, val: identity }))
 
-      return {
-        toCheck: newToView[0],
-        toView: newToView,
-        border: left,
-      }
-    },
-  };
-
-  return properHit ? newState[border] : constValue;
+const sliceFromBorder = {
+  left: (string) => ({
+    string: string.slice(1),
+    border: right,
+    nextGoal: string[string.length - 1],
+  }),
+  right: (string) => ({
+    string: string.slice(0, -1),
+    border: left,
+    nextGoal: string[0],
+  }),
 };
 
+const startState = { transformTable: nextState(),
+                     string: sourceCharArr,
+                     border: left,
+                     nextGoal: sourceCharArr[0]
+                   };
+
 const letters$ = fromKeyBoard$
-        .startWith('')
         .map(({keyCode}) => getCharFromKeyCode(keyCode))
-        .scan(({toCheck, toView, border}, val) =>
-              newData({toCheck, toView, properHit: toCheck === val, border}),
-              { toCheck: sourceCharArr[0],
-                toView: sourceCharArr,
-                border: left
-              })
-        .distinctUntilChanged(data => data.toView.join(''))
-        .pluck('toView')
-        .takeUntil(Rx.Observable.timer(5000));
+        .filter(identity)
+        .scan(({transformTable, string, border, nextGoal}, pressedKey) => {
+          const getNextState = transformTable[pressedKey];
+          const newData = getNextState({string, border, nextGoal});
+
+          transformTable = nextState();
+          transformTable[newData.nextGoal] = ({string, border}) => sliceFromBorder[border](string);
+
+          return {
+            transformTable,
+            ...newData
+          }
+        }, startState)
+        .distinctUntilChanged(data => data.string.join(''))
+        .pluck('string')
+        // .takeUntil(Rx.Observable.timer(5000));
 
 const firstInterval = Number(window.interval.value);
 
@@ -86,6 +90,7 @@ const lettersGame$ = letters$
         .share();
 
 const lettersSubscription = lettersGame$
+        .startWith(startState.string)
         .subscribe(
           (x) => {
             textElement.innerText = spacesToUnderscore(x);

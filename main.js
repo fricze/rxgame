@@ -16,17 +16,20 @@ const interval$ = Rx.Observable.fromEvent(window.interval, 'change')
         .map(e => Number(e.currentTarget.value))
         .startWith(firstInterval);
 
-const lettersSubscription = letters$
+const textElement = window.text;
+
+const lettersGame$ = letters$
         .withLatestFrom(interval$)
         .timeout(([_, interval]) => Rx.Observable.timer(interval))
-        .map(([data]) => data)
+        .map(([data]) => data);
+
+const lettersSubscription = lettersGame$
         .subscribe((x) => {
-          console.log(x)
+          window.text.innerText = x.join('');
         }, x => { alert(x) });
 
-// .do(x => console.log(x))
-// .filter((stringArr) => stringArr.length === 0)
-// .subscribe(() => subscription.dispose());
+lettersGame$.filter((stringArr) => stringArr.length === 0)
+  .subscribe(() => lettersSubscription.dispose());
 
 /*
  const arrObservable = new Rx.Observable.just(sourceCharArr).subscribe((observer) => {

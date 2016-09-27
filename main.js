@@ -6,15 +6,15 @@ import { identity } from 'fn';
 const sourceCharArr = exampleString.split('');
 const fromKeyBoard$ = Rx.Observable.fromEvent(window, 'keyup');
 
-Array.prototype.safeReverse = function(){
+Array.prototype.safeReverse = function() {
   return this.slice().reverse();
 };
 
-function spacesToUnderscore(string){
+function spacesToUnderscore(string) {
   return string.map(letter => letter === ' ' ? '_' : letter).join('');
 }
 
-function mapObject(obj, fn){
+function mapObject(obj, fn) {
   return Object.keys(obj).reduce(function(acc, currentProp) {
     const { key, val } = fn(currentProp, obj[currentProp]);
     acc[key] = val;
@@ -22,7 +22,7 @@ function mapObject(obj, fn){
   }, {});
 }
 
-function nextState(){
+function nextState() {
   return mapObject(keyCodes, (key, val) => ({ key: val, val: identity }));
 }
 

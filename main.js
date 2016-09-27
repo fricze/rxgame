@@ -6,54 +6,61 @@ import { identity } from 'fn';
 const sourceCharArr = exampleString.split('');
 const fromKeyBoard$ = Rx.Observable.fromEvent(window, 'keyup');
 
-Array.prototype.safeReverse = function safeReverse() {
+Array.prototype.safeReverse = function(){
   return this.slice().reverse();
+};
+
+function spacesToUnderscore(string){
+  return string.map(letter => letter === ' ' ? '_' : letter).join('');
 }
 
-const spacesToUnderscore = string => string.map(letter => letter === ' ' ? '_' : letter).join('');
-
-const left = 'left';
-const right = 'right';
-
-const mapObject = (obj, fn) => {
-  return Object.keys(obj).reduce(function(acc, current) {
-    const { key, val } = fn(current, obj[current]);
+function mapObject(obj, fn){
+  return Object.keys(obj).reduce(function(acc, currentProp) {
+    const { key, val } = fn(currentProp, obj[currentProp]);
     acc[key] = val;
-
     return acc;
   }, {});
 }
 
-const nextState = () => mapObject(keyCodes, (key, val) => ({ key: val, val: identity }))
+function nextState(){
+  return mapObject(keyCodes, (key, val) => ({ key: val, val: identity }));
+}
+
+
+const left = 'left';
+const right = 'right';
 
 const sliceFromBorder = {
   left: (string) => ({
     string: string.slice(1),
-    border: right,
-    nextGoal: string[string.length - 1],
+    nextTransformationObject: sliceFromBorder.right,
+    nextGoal: string[string.length - 1]
   }),
   right: (string) => ({
     string: string.slice(0, -1),
-    border: left,
-    nextGoal: string[0],
-  }),
+    nextTransformationObject: sliceFromBorder.left,
+    nextGoal: string[0]
+  })
 };
 
-const startState = { transformTable: nextState(),
-                     string: sourceCharArr,
-                     border: left,
-                     nextGoal: sourceCharArr[0]
-                   };
+const startingTransformationObject = sliceFromBorder.left;
+
+const startState = {
+    transformTable: nextState(),
+    string: sourceCharArr,
+    nextTransformationObject: startingTransformationObject,
+    nextGoal: sourceCharArr[0]
+ };
 
 const letters$ = fromKeyBoard$
         .map(({keyCode}) => getCharFromKeyCode(keyCode))
         .filter(identity)
-        .scan(({transformTable, string, border, nextGoal}, pressedKey) => {
+        .scan(({transformTable, string, nextTransformationObject, nextGoal}, pressedKey) => {
           const getNextState = transformTable[pressedKey];
-          const newData = getNextState({string, border, nextGoal});
+          const newData = getNextState({string, nextTransformationObject, nextGoal});
 
           transformTable = nextState();
-          transformTable[newData.nextGoal] = ({string, border}) => sliceFromBorder[border](string);
+          transformTable[newData.nextGoal] = ({string, nextTransformationObject}) => nextTransformationObject(string);
 
           return {
             transformTable,
@@ -92,10 +99,10 @@ const lettersGame$ = letters$
 const lettersSubscription = lettersGame$
         .startWith(startState.string)
         .subscribe(
-          (x) => {
+          x => {
             textElement.innerText = spacesToUnderscore(x);
           },
-          x => { console.error(x) },
+          x => console.error(x),
           () => console.log('onComplete!')
         );
 

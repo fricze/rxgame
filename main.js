@@ -26,10 +26,6 @@ function nextState(){
   return mapObject(keyCodes, (key, val) => ({ key: val, val: identity }));
 }
 
-
-const left = 'left';
-const right = 'right';
-
 const sliceFromBorder = {
   left: (string) => ({
     string: string.slice(1),
@@ -46,11 +42,11 @@ const sliceFromBorder = {
 const startingTransformationObject = sliceFromBorder.left;
 
 const startState = {
-    transformTable: nextState(),
-    string: sourceCharArr,
-    nextTransformationObject: startingTransformationObject,
-    nextGoal: sourceCharArr[0]
- };
+  transformTable: nextState(),
+  string: sourceCharArr,
+  nextTransformationObject: startingTransformationObject,
+  nextGoal: sourceCharArr[0]
+};
 
 const letters$ = fromKeyBoard$
         .map(({keyCode}) => getCharFromKeyCode(keyCode))
@@ -60,7 +56,8 @@ const letters$ = fromKeyBoard$
           const newData = getNextState({string, nextTransformationObject, nextGoal});
 
           transformTable = nextState();
-          transformTable[newData.nextGoal] = ({string, nextTransformationObject}) => nextTransformationObject(string);
+          transformTable[newData.nextGoal] =
+            ({string, nextTransformationObject}) => nextTransformationObject(string);
 
           return {
             transformTable,
@@ -69,7 +66,7 @@ const letters$ = fromKeyBoard$
         }, startState)
         .distinctUntilChanged(data => data.string.join(''))
         .pluck('string')
-        // .takeUntil(Rx.Observable.timer(5000));
+// .takeUntil(Rx.Observable.timer(5000));
 
 const firstInterval = Number(window.interval.value);
 

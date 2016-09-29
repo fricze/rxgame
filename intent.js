@@ -3,20 +3,6 @@ import replicate from './replicate';
 import getCharFromKeyCode from './keycodes';
 import { isValue } from './fn';
 
-const letter$ = new Rx.Subject();
-const intervalChange$ = new Rx.Subject();
-const intervalValue$ = new Rx.Subject();
-const charTimeout$ = new Rx.Subject();
-const gameWon$ = new Rx.Subject();
-
-const observe = view => {
-  replicate(view.keyDown$, letter$);
-  replicate(view.intervalChange$, intervalChange$);
-  replicate(view.intervalValue$, intervalValue$);
-  replicate(view.viewString$, charTimeout$);
-  replicate(view.viewString$, gameWon$);
-}
-
 const timeoutLose = {
   message: 'timeout',
   type: 'lose'
@@ -30,6 +16,27 @@ const gameWon = {
 const gameWonMessage$ = Rx.Observable.just(gameWon);
 const gameLoseMessage$ = Rx.Observable.just(timeoutLose);
 
+const letter$ = new Rx.Subject();
+const intervalChange$ = new Rx.Subject();
+const intervalValue$ = new Rx.Subject();
+const charTimeout$ = new Rx.Subject();
+const gameWonReplicate$ = new Rx.Subject();
+
+const gameWon$ = gameWonMessage$.sample(
+  gameWonReplicate$.filter(string => !string.length)
+);
+const gameLose$ = gameLoseMessage$.sample(
+  charTimeout$
+    .withLatestFrom(intervalValue$)
+    .timeout(
+      ([ , interval]) => Rx.Observable.timer(interval),
+      Rx.Observable.just(timeoutLose)
+    )
+    .filter(val => val.type === 'lose')
+);
+
+const terminateGame$ = Rx.Observable.merge(gameWon$, gameLose$);
+
 export default {
   letter$: letter$
     .map(({keyCode}) => getCharFromKeyCode(keyCode))
@@ -37,17 +44,16 @@ export default {
   intervalChange$: intervalChange$
     .pluck('currentTarget', 'value')
     .map(Number),
-  loser$: gameLoseMessage$.sample(
-    charTimeout$
-      .withLatestFrom(intervalValue$)
-      .timeout(
-        ([ , interval]) => Rx.Observable.timer(interval),
-        Rx.Observable.just(timeoutLose)
-      )
-      .filter(val => val.type === 'lose')
-  ),
-  gameWon$: gameWonMessage$.sample(
-    gameWon$.filter(string => !string.length)
-  ),
+  gameLose$,
+  gameWon$,
+  terminateGame$,
   observe,
 };
+
+function observe(view) {
+  replicate(view.keyDown$, letter$);
+  replicate(view.intervalChange$, intervalChange$);
+  replicate(view.intervalValue$, intervalValue$);
+  replicate(view.viewString$, charTimeout$);
+  replicate(view.viewString$, gameWonReplicate$);
+}

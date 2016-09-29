@@ -10,6 +10,7 @@ const string$ = new Rx.Subject();
 const interval$ = new Rx.Subject();
 const gameLose$ = new Rx.Subject();
 const gameWon$ = new Rx.Subject();
+const terminateGame$ = new Rx.Subject();
 
 const currentString$ = string$
         .scan(({transformTable, string, nextTransformation, nextGoal}, pressedKey) => {
@@ -43,12 +44,14 @@ export default {
   interval$: interval$.startWith(startInterval),
   loseMessage$: gameLose$.pluck('message'),
   winMessage$: gameWon$.pluck('message'),
+  terminateGame$,
   observe,
 }
 
 function observe(intent) {
   replicate(intent.letter$, string$);
   replicate(intent.intervalChange$, interval$);
-  replicate(intent.loser$, gameLose$);
+  replicate(intent.gameLose$, gameLose$);
   replicate(intent.gameWon$, gameWon$);
+  replicate(intent.terminateGame$, terminateGame$);
 }

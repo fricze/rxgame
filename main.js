@@ -29,36 +29,40 @@ function nextState() {
 const sliceFromBorder = {
   left: (string) => ({
     string: string.slice(1),
-    nextTransformationObject: sliceFromBorder.right,
+    nextTransformation: sliceFromBorder.right,
     nextGoal: string[string.length - 1]
   }),
   right: (string) => ({
     string: string.slice(0, -1),
-    nextTransformationObject: sliceFromBorder.left,
+    nextTransformation: sliceFromBorder.left,
     nextGoal: string[0]
   })
 };
 
-const startingTransformationObject = sliceFromBorder.left;
+const startingTransformation = sliceFromBorder.left;
+
+const transformTable = nextState();
+const nextGoal = sourceCharArr[0];
+transformTable[nextGoal] =
+  ({string, nextTransformation}) => nextTransformation(string);
 
 const startState = {
-  transformTable: nextState(),
+  transformTable,
   string: sourceCharArr,
-  nextTransformationObject: startingTransformationObject,
-  nextGoal: sourceCharArr[0]
+  nextTransformation: startingTransformation,
+  nextGoal
 };
 
 const letters$ = fromKeyBoard$
         .map(({keyCode}) => getCharFromKeyCode(keyCode))
         .filter(identity)
-        .scan(({transformTable, string, nextTransformationObject, nextGoal}, pressedKey) => {
-          console.log(pressedKey);
+        .scan(({transformTable, string, nextTransformation, nextGoal}, pressedKey) => {
           const getNextState = transformTable[pressedKey];
-          const newData = getNextState({string, nextTransformationObject, nextGoal});
+          const newData = getNextState({string, nextTransformation, nextGoal});
 
           transformTable = nextState();
           transformTable[newData.nextGoal] =
-            ({string, nextTransformationObject}) => nextTransformationObject(string);
+            ({string, nextTransformation}) => nextTransformation(string);
 
           return {
             transformTable,
@@ -68,7 +72,7 @@ const letters$ = fromKeyBoard$
         .distinctUntilChanged(data => data.string.join(''))
         .pluck('string')
         .share()
-        // .takeUntil(Rx.Observable.timer(5000));
+// .takeUntil(Rx.Observable.timer(5000));
 
 const firstInterval = Number(window.interval.value);
 

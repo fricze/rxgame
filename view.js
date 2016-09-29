@@ -6,6 +6,7 @@ const viewString$ = new Rx.ReplaySubject(1);
 const viewAverageTime$ = new Rx.Subject();
 const intervalValue$ = new Rx.ReplaySubject(1);
 const loseMessage$ = new Rx.Subject();
+const winMessage$ = new Rx.Subject();
 
 const intervalElement = window.interval;
 const intervalChange$ = Rx.Observable.fromEvent(intervalElement, 'change');
@@ -20,6 +21,7 @@ export default {
   intervalChange$,
   intervalValue$,
   loseMessage$,
+  winMessage$,
   observe,
 }
 
@@ -28,4 +30,5 @@ function observe(model) {
   replicate(model.averageTime$, viewAverageTime$);
   replicate(model.interval$, intervalValue$);
   replicate(model.loseMessage$, loseMessage$);
+  replicate(model.winMessage$, winMessage$);
 }

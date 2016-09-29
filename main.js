@@ -29,8 +29,10 @@ function nextState() {
 const sliceFromBorder = {
   left: (string) => ({
     string: string.slice(1),
-    nextTransformation: sliceFromBorder.right,
-    nextGoal: string[string.length - 1]
+    // nextTransformation: sliceFromBorder.right,
+    nextTransformation: sliceFromBorder.left,
+    // nextGoal: string[string.length - 1]
+    nextGoal: string[1]
   }),
   right: (string) => ({
     string: string.slice(0, -1),
@@ -60,6 +62,8 @@ const letters$ = fromKeyBoard$
           const getNextState = transformTable[pressedKey];
           const newData = getNextState({string, nextTransformation, nextGoal});
 
+          console.log(newData.nextGoal);
+
           transformTable = nextState();
           transformTable[newData.nextGoal] =
             ({string, nextTransformation}) => nextTransformation(string);
@@ -72,7 +76,7 @@ const letters$ = fromKeyBoard$
         .distinctUntilChanged(data => data.string.join(''))
         .pluck('string')
         .share()
-// .takeUntil(Rx.Observable.timer(5000));
+        // .takeUntil(Rx.Observable.timer(5000));
 
 const firstInterval = Number(window.interval.value);
 
@@ -83,13 +87,24 @@ const interval$ = Rx.Observable.fromEvent(window.interval, 'change')
 
 const textElement = window.text;
 const speedValueElement = window.speed_value;
+const lastSpeedValueElement = window.last_speed_value;
 
-letters$
+const average2Subscribe = letters$
   .timeInterval()
-  .map(data => data.interval)
+  .pluck('interval')
   .scan((acc, val) => acc + val, 0)
   .map((val, idx) => val / (idx + 1))
   .subscribe(averageSpeed => speedValueElement.innerText = averageSpeed);
+
+const averageSubscribe = letters$
+        .timeInterval()
+        .pluck('interval')
+        .average()
+        .subscribe(
+          averageSpeed => lastSpeedValueElement.innerText = averageSpeed,
+          onError => alert('onError'),
+          onComplete => console.log('onComplete average')
+        );
 
 const lettersGame$ = letters$
         .withLatestFrom(interval$)
@@ -97,7 +112,7 @@ const lettersGame$ = letters$
           ([ , interval]) => Rx.Observable.timer(interval),
           Rx.Observable.just('loser!').map(x => [[x]])
         )
-        .map(([data]) => data)
+        .pluck(0)
         .share();
 
 const lettersSubscription = lettersGame$
@@ -105,7 +120,7 @@ const lettersSubscription = lettersGame$
         .subscribe(
           x => textElement.innerText = spacesToUnderscore(x),
           x => console.error(x),
-          () => console.log('onComplete!')
+          () => console.log('lettersSubscription onComplete!')
         );
 
 const finalSubscription = lettersGame$
@@ -115,4 +130,8 @@ const finalSubscription = lettersGame$
           // closing channel is needed in order to clear timeout (and error that it generates)
           finalSubscription.dispose();
           lettersSubscription.dispose();
+          averageSubscribe.dispose();
+          average2Subscribe.dispose();
+
+          console.log('dispose');
         });

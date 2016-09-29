@@ -6,6 +6,8 @@ import startState, {
   startInterval
 } from './state';
 
+const subscriptions = [];
+
 const string$ = new Rx.Subject();
 const interval$ = new Rx.Subject();
 const gameLose$ = new Rx.Subject();
@@ -38,6 +40,10 @@ const averageTime$ = currentString$
         .scan((acc, val) => acc + val, 0)
         .map((val, idx) => val / (idx + 1));
 
+subscriptions.push(terminateGame$.subscribe(() => {
+  subscriptions.forEach(subscription => subscription.dispose());
+}));
+
 export default {
   currentString$,
   averageTime$,
@@ -49,9 +55,11 @@ export default {
 }
 
 function observe(intent) {
-  replicate(intent.letter$, string$);
-  replicate(intent.intervalChange$, interval$);
-  replicate(intent.gameLose$, gameLose$);
-  replicate(intent.gameWon$, gameWon$);
-  replicate(intent.terminateGame$, terminateGame$);
+  subscriptions.push(
+    replicate(intent.letter$, string$),
+    replicate(intent.intervalChange$, interval$),
+    replicate(intent.gameLose$, gameLose$),
+    replicate(intent.gameWon$, gameWon$),
+    replicate(intent.terminateGame$, terminateGame$)
+  )
 }

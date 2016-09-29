@@ -3,6 +3,8 @@ import replicate from './replicate';
 import getCharFromKeyCode from './keycodes';
 import { isValue } from './fn';
 
+const subscriptions = [];
+
 const timeoutLose = {
   message: 'timeout',
   type: 'lose'
@@ -37,6 +39,10 @@ const gameLose$ = gameLoseMessage$.sample(
 
 const terminateGame$ = Rx.Observable.merge(gameWon$, gameLose$);
 
+subscriptions.push(terminateGame$.subscribe(() => {
+  subscriptions.forEach(subscription => subscription.dispose());
+}));
+
 export default {
   letter$: letter$
     .map(({keyCode}) => getCharFromKeyCode(keyCode))
@@ -51,9 +57,11 @@ export default {
 };
 
 function observe(view) {
-  replicate(view.keyDown$, letter$);
-  replicate(view.intervalChange$, intervalChange$);
-  replicate(view.intervalValue$, intervalValue$);
-  replicate(view.viewString$, charTimeout$);
-  replicate(view.viewString$, gameWonReplicate$);
+  subscriptions.push(
+    replicate(view.keyDown$, letter$),
+    replicate(view.intervalChange$, intervalChange$),
+    replicate(view.intervalValue$, intervalValue$),
+    replicate(view.viewString$, charTimeout$),
+    replicate(view.viewString$, gameWonReplicate$)
+  )
 }

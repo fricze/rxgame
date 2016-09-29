@@ -2,8 +2,7 @@ import Rx from 'rx';
 import replicate from './replicate';
 import getCharFromKeyCode from './keycodes';
 import { isValue } from './fn';
-
-const subscriptions = [];
+import toDispose from './to_dispose';
 
 const timeoutLose = {
   message: 'timeout',
@@ -38,6 +37,7 @@ const gameLose$ = gameLoseMessage$.sample(
 );
 
 const terminateGame$ = Rx.Observable.merge(gameWon$, gameLose$);
+const subscriptions = toDispose(terminateGame$);
 
 subscriptions.push(terminateGame$.subscribe(() => {
   subscriptions.forEach(subscription => subscription.dispose());

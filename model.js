@@ -5,14 +5,15 @@ import startState, {
   baseCharArray,
   startInterval
 } from './state';
-
-const subscriptions = [];
+import toDispose from './to_dispose';
 
 const string$ = new Rx.Subject();
 const interval$ = new Rx.Subject();
 const gameLose$ = new Rx.Subject();
 const gameWon$ = new Rx.Subject();
 const terminateGame$ = new Rx.Subject();
+
+const subscriptions = toDispose(terminateGame$);
 
 const currentString$ = string$
         .scan(({transformTable, string, nextTransformation, nextGoal}, pressedKey) => {
@@ -39,10 +40,6 @@ const averageTime$ = currentString$
         .pluck('interval')
         .scan((acc, val) => acc + val, 0)
         .map((val, idx) => val / (idx + 1));
-
-subscriptions.push(terminateGame$.subscribe(() => {
-  subscriptions.forEach(subscription => subscription.dispose());
-}));
 
 export default {
   currentString$,

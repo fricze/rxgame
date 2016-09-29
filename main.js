@@ -11,23 +11,6 @@
 // const speedValueElement = window.speed_value;
 // const lastSpeedValueElement = window.last_speed_value;
 
-// const average2Subscribe = letters$
-//         .timeInterval()
-//         .pluck('interval')
-//         .scan((acc, val) => acc + val, 0)
-//         .map((val, idx) => val / (idx + 1))
-//         .subscribe(averageSpeed => speedValueElement.innerText = averageSpeed);
-
-// const averageSubscribe = letters$
-//         .timeInterval()
-//         .pluck('interval')
-//         .average()
-//         .subscribe(
-//           averageSpeed => lastSpeedValueElement.innerText = averageSpeed,
-//           onError => alert('onError'),
-//           onComplete => console.log('onComplete average')
-//         );
-
 // const lettersGame$ = letters$
 //         .withLatestFrom(interval$)
 //         .timeout(
@@ -36,29 +19,6 @@
 //         )
 //         .pluck(0)
 //         .share();
-
-
-// const lettersSubscription = lettersGame$
-//         .startWith(startState.string)
-//         .subscribe(
-//           x => textElement.innerText = spacesToUnderscore(x),
-//           x => console.error(x),
-//           () => console.log('lettersSubscription onComplete!')
-//         );
-
-// const finalSubscription = lettersGame$
-//         .filter((stringArr) => stringArr.length === 0)
-//         .do(() => console.log('you won'))
-//         .subscribe(() => {
-//           // closing channel is needed in order to clear timeout (and error that it generates)
-//           finalSubscription.dispose();
-//           lettersSubscription.dispose();
-//           averageSubscribe.dispose();
-//           average2Subscribe.dispose();
-
-//           console.log('dispose');
-//         });
-
 
 import Intent from './intent';
 import View from './view';

@@ -52,6 +52,7 @@ const letters$ = fromKeyBoard$
         .map(({keyCode}) => getCharFromKeyCode(keyCode))
         .filter(identity)
         .scan(({transformTable, string, nextTransformationObject, nextGoal}, pressedKey) => {
+          console.log(pressedKey);
           const getNextState = transformTable[pressedKey];
           const newData = getNextState({string, nextTransformationObject, nextGoal});
 
@@ -66,7 +67,8 @@ const letters$ = fromKeyBoard$
         }, startState)
         .distinctUntilChanged(data => data.string.join(''))
         .pluck('string')
-// .takeUntil(Rx.Observable.timer(5000));
+        .share()
+        // .takeUntil(Rx.Observable.timer(5000));
 
 const firstInterval = Number(window.interval.value);
 
@@ -76,13 +78,14 @@ const interval$ = Rx.Observable.fromEvent(window.interval, 'change')
         .startWith(firstInterval);
 
 const textElement = window.text;
+const speedValueElement = window.speed_value;
 
 letters$
   .timeInterval()
   .map(data => data.interval)
   .scan((acc, val) => acc + val, 0)
   .map((val, idx) => val / (idx + 1))
-  .subscribe(x => console.log(x));
+  .subscribe(averageSpeed => speedValueElement.innerText = averageSpeed);
 
 const lettersGame$ = letters$
         .withLatestFrom(interval$)
@@ -96,9 +99,7 @@ const lettersGame$ = letters$
 const lettersSubscription = lettersGame$
         .startWith(startState.string)
         .subscribe(
-          x => {
-            textElement.innerText = spacesToUnderscore(x);
-          },
+          x => textElement.innerText = spacesToUnderscore(x),
           x => console.error(x),
           () => console.log('onComplete!')
         );

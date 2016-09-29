@@ -3,19 +3,11 @@ import replicate from './replicate';
 import getCharFromKeyCode from './keycodes';
 import { isValue } from './fn';
 import toDispose from './to_dispose';
-
-const timeoutLose = {
-  message: 'timeout',
-  type: 'lose'
-};
-
-const gameWon = {
-  message: 'you won you fuckermother!',
-  type: 'win'
-};
-
-const gameWonMessage$ = Rx.Observable.just(gameWon);
-const gameLoseMessage$ = Rx.Observable.just(timeoutLose);
+import {
+  gameWonMessage$,
+  gameLoseMessage$,
+  timeoutLose
+} from './game_end_messages';
 
 const letter$ = new Rx.Subject();
 const intervalChange$ = new Rx.Subject();

@@ -36,7 +36,7 @@ export default {
     .filter(isValue),
   intervalChange$: intervalChange$
     .pluck('currentTarget', 'value')
-    .map(e => Number(e)),
+    .map(Number),
   loser$: gameLoseMessage$.sample(
     charTimeout$
       .withLatestFrom(intervalValue$)

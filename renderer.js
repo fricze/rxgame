@@ -4,24 +4,25 @@ import { spacesToUnderscore } from './fn';
 
 const renderString$ = new Rx.Subject();
 const renderAverageTime$ = new Rx.Subject();
+const renderLoseMessage$ = new Rx.Subject();
 
 const textElement = window.text;
+const errorElement = window.error;
 const averageTimeElement = window.speed_value;
 
-// const lastSpeedValueElement = window.last_speed_value;
-
 renderString$
-  .subscribe(
-    x => textElement.innerText = spacesToUnderscore(x),
-    x => console.error(x),
-    () => console.log('lettersSubscription onComplete!')
+  .subscribeOnNext(
+    x => textElement.innerText = spacesToUnderscore(x)
   );
 
 renderAverageTime$
-  .subscribe(
-    x => averageTimeElement.innerText = x,
-    x => console.error(x),
-    () => console.log('lettersSubscription onComplete!')
+  .subscribeOnNext(
+    x => averageTimeElement.innerText = x
+  );
+
+renderLoseMessage$
+  .subscribeOnNext(
+    x => errorElement.innerText = x
   );
 
 export default {
@@ -31,4 +32,5 @@ export default {
 function observe(view) {
   replicate(view.viewString$, renderString$);
   replicate(view.viewAverageTime$, renderAverageTime$);
+  replicate(view.loseMessage$, renderLoseMessage$);
 }

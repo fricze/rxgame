@@ -2,10 +2,13 @@ import Rx from 'rx';
 import replicate from './replicate';
 import startState, {
   nextState,
-  baseCharArray
+  baseCharArray,
+  startInterval
 } from './state';
 
 const string$ = new Rx.Subject();
+const interval$ = new Rx.Subject();
+const gameLose$ = new Rx.Subject();
 
 const currentString$ = string$
         .scan(({transformTable, string, nextTransformation, nextGoal}, pressedKey) => {
@@ -21,9 +24,11 @@ const currentString$ = string$
             ...newData
           }
         }, startState)
+        .startWith({
+          string: baseCharArray
+        })
         .distinctUntilChanged(data => data.string.join(''))
         .pluck('string')
-        .startWith(baseCharArray);
 
 const averageTime$ = currentString$
         .timeInterval()
@@ -34,9 +39,13 @@ const averageTime$ = currentString$
 export default {
   currentString$,
   averageTime$,
-  observe
+  interval$: interval$.startWith(startInterval),
+  loseMessage$: gameLose$.pluck('message'),
+  observe,
 }
 
 function observe(intent) {
   replicate(intent.letter$, string$);
+  replicate(intent.intervalChange$, interval$);
+  replicate(intent.loser$, gameLose$);
 }

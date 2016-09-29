@@ -4,19 +4,35 @@ import getCharFromKeyCode from './keycodes';
 import { isValue } from './fn';
 
 const letter$ = new Rx.Subject();
-// const gameData$ = new Rx.Subject();
-
-// const gameWon$ = gameData$.map(s => !s);
+const intervalChange$ = new Rx.Subject();
+const intervalValue$ = new Rx.Subject();
+const charTimeout$ = new Rx.Subject();
 
 const observe = view => {
   replicate(view.keyDown$, letter$);
-  // replicate(view.viewData$, gameData$);
+  replicate(view.intervalChange$, intervalChange$);
+  replicate(view.intervalValue$, intervalValue$);
+  replicate(view.viewString$, charTimeout$);
 }
+
+const timeoutLose = {
+  message: 'timeout',
+  type: 'lose'
+};
 
 export default {
   letter$: letter$
     .map(({keyCode}) => getCharFromKeyCode(keyCode))
     .filter(isValue),
-  // gameWon$,
-  observe
+  intervalChange$: intervalChange$
+    .pluck('currentTarget', 'value')
+    .map(e => Number(e)),
+  loser$: charTimeout$
+    .withLatestFrom(intervalValue$)
+    .timeout(
+      ([ , interval]) => Rx.Observable.timer(interval),
+      Rx.Observable.just(timeoutLose)
+    )
+    .filter(val => val.type === 'lose'),
+  observe,
 };

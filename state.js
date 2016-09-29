@@ -23,4 +23,6 @@ const startState = {
   nextGoal
 };
 
+export const startInterval = 1000;
+
 export default startState;
